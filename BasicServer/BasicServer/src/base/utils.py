@@ -10,6 +10,7 @@ __pychecker__ = 'no-callinit no-classattr'
 __revision__ = '0.1'
 
 import json
+import time
 import hashlib
 
 from django.http import HttpResponse
@@ -26,5 +27,5 @@ def get_md5(src):
     return base_md5.hexdigest()
 
 def generate_token(user_id):
-    return get_md5(user_id)
+    return get_md5(str(user_id) + str(time.time()))
 

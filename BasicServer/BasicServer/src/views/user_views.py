@@ -22,7 +22,7 @@ from BasicServer.src.base.aop import required_login
 
 db = dbtools.DB()
 
-
+# TODO check already login
 def login_action(request):
     third_party_id = None
     third_party_id_type = None
@@ -56,8 +56,11 @@ def login_action(request):
         return build_error_response(request, 710, ERR_CODE[710])
     
     # set session
-    token = generate_token(str(user_id))
-    request.session['token'] = token
+    if 'token' not in request.session:
+        token = generate_token(user_id)
+        request.session['token'] = token
+    else:
+        token = request.session['token']
     
     # success response
     res = {'code': 200,

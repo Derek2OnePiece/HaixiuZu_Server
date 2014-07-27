@@ -8,8 +8,8 @@
 __author__ = 'Derek (Jing Luo), luojing.derek@gmail.com'
 __pychecker__ = 'no-callinit no-classattr'
 
-import pymongo
 import time
+import pymongo
 
 from bson.objectid import ObjectId
 
