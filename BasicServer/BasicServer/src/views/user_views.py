@@ -43,6 +43,8 @@ def login_action(request):
             # first login
             first_login = 1
             user_id = db.add_shadow_user()
+            # if user is not None:
+            #     user_id = user['_id']
             if not db.add_douban_id_to_user_map(user_id, douban_id):
                 return build_error_response(request, 300, ERR_CODE[300])
         else:
@@ -54,13 +56,13 @@ def login_action(request):
         return build_error_response(request, 710, ERR_CODE[710])
     
     # set session
-    token = generate_token(user_id)
+    token = generate_token(str(user_id))
     request.session['token'] = token
     
     # success response
     res = {'code': 200,
            'msg': SUCC_CODE[200],
-           'uid': user_id,
+           'uid': str(user_id),
            'third_party_id': third_party_id,
            'third_party_id_type': third_party_id_type,
            'first_login': first_login,
