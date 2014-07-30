@@ -34,7 +34,6 @@ def login_action(request):
         third_party_id_type = request.POST['third_party_id_type']
     else:
         return build_error_response(request, 700, ERR_CODE[700])
-    
         
     if 'DOUBAN' == third_party_id_type:
         douban_id = third_party_id
@@ -71,13 +70,19 @@ def login_action(request):
            'first_login': first_login,
            'token': token,
            }
-    return HttpResponse(json.dumps(res), )
+    return HttpResponse(json.dumps(res), mimetype='application/json')
     
 @required_login
 def logout_action(request):
     try:
         del request.session['token']
         res = {'code': 200, 'msg': SUCC_CODE[200]}
-        return HttpResponse(json.dumps(res), )
+        return HttpResponse(json.dumps(res), mimetype='application/json')
     except KeyError:
         return build_error_response(request, 710, ERR_CODE[710])
+
+@required_login
+def update_user_info_action(request):
+    pass
+
+

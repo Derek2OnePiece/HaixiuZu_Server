@@ -14,12 +14,11 @@ import time
 import hashlib
 
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 
 
 def build_error_response(request, err_code, err_msg):
-    return HttpResponse(json.dumps({'code': err_code, 'msg': err_msg }))
+    return HttpResponse(json.dumps({'code': err_code, 'msg': err_msg }),
+                        mimetype='application/json')
 
 def get_md5(src):
     base_md5 = hashlib.md5()
