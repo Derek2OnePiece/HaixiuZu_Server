@@ -7,6 +7,8 @@
 #
 __author__ = 'Derek (Jing Luo), luojing.derek@gmail.com'
 __pychecker__ = 'no-callinit no-classattr'
+__revision__ = '0.1'
+
 
 #　import os
 import json

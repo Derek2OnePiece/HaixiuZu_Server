@@ -3,11 +3,12 @@
 # 
 # Created: 2014-07-19
 #
-# All user operations
+# Decorator
 #
 __author__ = 'Derek (Jing Luo), luojing.derek@gmail.com'
 __pychecker__ = 'no-callinit no-classattr'
 __revision__ = '0.1'
+
 
 import functools
 
@@ -27,29 +28,16 @@ def required_login(func=None):
     """
     def decorator(func):
         """
-        real decorator that must accept the target function as argument
+        The real decorator that must accept the target function as argument
         """
         @functools.wraps(func)
-        def wrapper(*args,  **kwargs):
-            """
-            use func's doc string
-            """
-            import inspect
-            
-            arg_spec = inspect.getargspec(func)
+        def wrapper(*args, **kwargs):
             request = args[0]
-            session = request.session
-            
-            # TODO: check whether or not contains key 'token'
-            for key in kwargs:
-                if key == 'token' and kwargs[key] != session['token']:
-                    return build_error_response(request, 310, ERR_CODE[310])
-            for i, value in enumerate(args):
-                if arg_spec.args[i] and arg_spec.args[i] == 'token'\
-                  and value != session['token']:
-                    return build_error_response(request, 310, ERR_CODE[310])
-            
-            return func(*args,  **kwargs)
+            if 'token' in request.POST and 'token' in request.session \
+              and request.POST['token'] == request.session['token']:
+                return func(*args, **kwargs)
+            else:
+                return build_error_response(request, 310, ERR_CODE[310])
         return wrapper
 
     if func is None:
