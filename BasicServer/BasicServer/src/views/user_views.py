@@ -14,7 +14,8 @@ __revision__ = '0.1'
 import json
 
 from django.http import HttpResponse
-#　from bson.objectid import ObjectId
+from django.utils import simplejson
+from bson.objectid import ObjectId
 from BasicServer import dbtools
 from BasicServer.src.base.utils import build_error_response
 from BasicServer.src.base.utils import generate_token
@@ -22,18 +23,24 @@ from BasicServer.src.base.enum import ERR_CODE
 from BasicServer.src.base.enum import SUCC_CODE
 from BasicServer.src.base.aop import required_login
 
+
 db = dbtools.DB()
+
 
 # TODO check already login
 def login_action(request):
+    # receive request data
+    req_post_data = None
+    if request.method == 'POST':
+        req_post_data = simplejson.loads(request.raw_post_data)
     third_party_id = None
     third_party_id_type = None
-    if 'third_party_id' in request.POST:
-        third_party_id = request.POST['third_party_id']
+    if 'third_party_id' in req_post_data:
+        third_party_id = req_post_data['third_party_id']
     else:
         return build_error_response(request, 700, ERR_CODE[700])
-    if 'third_party_id_type' in request.POST:
-        third_party_id_type = request.POST['third_party_id_type']
+    if 'third_party_id_type' in req_post_data:
+        third_party_id_type = req_post_data['third_party_id_type']
     else:
         return build_error_response(request, 700, ERR_CODE[700])
         
@@ -44,15 +51,11 @@ def login_action(request):
             # first login
             first_login = 1
             user_id = db.add_shadow_user()
-            # if user is not None:
-            #     user_id = user['_id']
             if not db.add_douban_id_to_user_map(user_id, douban_id):
                 return build_error_response(request, 300, ERR_CODE[300])
         else:
             first_login = 0
             user_id = user_id_map['user_id']
-            # success login
-            
     else:
         return build_error_response(request, 710, ERR_CODE[710])
     
@@ -84,7 +87,88 @@ def logout_action(request):
         return build_error_response(request, 710, ERR_CODE[710])
 
 @required_login
-def update_user_info_action(request):
-    pass
+def get_user_profile_action(request):
+    # receive request data
+    user_id = None
+    if request.method == 'GET':
+        if 'uid' in request.GET:
+            user_id = ObjectId(request.GET['uid'])
+        else:
+            return build_error_response(request, 700, ERR_CODE[700])
+    cur_user_profile = db.get_user_by_user_id(user_id)
+    if cur_user_profile is not None:
+        res = {'code': 200,
+               'msg': SUCC_CODE[200],
+               'uid': str(cur_user_profile['_id']),
+               'name': cur_user_profile['name'],
+               'desc': cur_user_profile['desc'],
+               'avatar': cur_user_profile['avatar'],
+               'avatar_tiny': cur_user_profile['avatar_tiny'],
+               'photo_wall': cur_user_profile['photo_wall'],
+               'photo_wall_tiny': cur_user_profile['photo_wall_tiny'],
+               }
+        return HttpResponse(json.dumps(res), mimetype='application/json')
+    else:
+        return build_error_response(request, 330, ERR_CODE[330])
 
-
+@required_login
+def update_user_profile_action(request):
+    # receive request data
+    req_post_data = None
+    if request.method == 'POST':
+        req_post_data = simplejson.loads(request.raw_post_data)
+    user_id = None
+    if 'uid' in req_post_data and req_post_data['uid'] != '':
+        user_id = ObjectId(req_post_data['uid'])
+    else:
+        return build_error_response(request, 700, ERR_CODE[700])
+    
+    cur_user_profile = db.get_user_by_user_id(user_id)
+    
+    # receive optional parameters of user profile
+    # name
+    # desc
+    # avatar
+    # avatar_tiny
+    # photo_wall
+    # photo_wall_tiny
+    name = None
+    desc = None
+    avatar = None
+    avatar_tiny = None
+    photo_wall = None
+    photo_wall_tiny = None
+    if 'name' in req_post_data:
+        name = req_post_data['name']
+    else:
+        name = cur_user_profile['name']
+    if 'desc' in req_post_data:
+        desc = req_post_data['desc']
+    else:
+        desc = cur_user_profile['desc']
+    if 'avatar' in req_post_data:
+        avatar = req_post_data['avatar']
+    else:
+        avatar = cur_user_profile['avatar']
+    if 'avatar_tiny' in req_post_data:
+        avatar_tiny = req_post_data['avatar_tiny']
+    else:
+        avatar_tiny = cur_user_profile['avatar_tiny']
+    if 'photo_wall' in req_post_data:
+        photo_wall = req_post_data['photo_wall']
+    else:
+        photo_wall = cur_user_profile['photo_wall']
+    if 'photo_wall_tiny' in req_post_data:
+        photo_wall_tiny = req_post_data['photo_wall_tiny']
+    else:
+        photo_wall_tiny = cur_user_profile['photo_wall_tiny']
+    try:
+        db.update_user_profile_by_user_id(
+          user_id, name, desc, avatar, avatar_tiny, photo_wall, photo_wall_tiny)
+        res = {'code': 200, 
+               'msg': SUCC_CODE[200],
+               'uid': str(user_id)}
+        return HttpResponse(json.dumps(res), mimetype='application/json')
+    except:
+        return build_error_response(request, 320, ERR_CODE[320])
+        

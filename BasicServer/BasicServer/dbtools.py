@@ -59,6 +59,7 @@ class DB:
                 'user_level': user_level,
                 
                 'name': None,
+                'desc': None,
                 'avatar': None,
                 'avatar_tiny': None,
                 'photo_wall': None,
@@ -67,6 +68,8 @@ class DB:
                 'loc_city_id': None,
                 'loc_city_name': None,
                 'geo_enabled': 0,
+                
+                'updated_ts': None,
                 }
         return self.get_collection('user').insert(user)
     
@@ -86,38 +89,64 @@ class DB:
                        }
         return self.get_collection('user_map').insert(user_id_map) is not None
     
+    def get_user_by_user_id(self, user_id):
+        return self.get_collection('user').find_one({'_id': user_id})
 
+    def update_user_profile_by_user_id(self, user_id, name, desc,
+                                       avatar, avatar_tiny,
+                                       photo_wall, photo_wall_tiny):
+        return self.get_collection('user')\
+            .update({'_id': user_id},
+                    {'$set': {'name': name,
+                              'desc': desc,
+                              'avatar': avatar,
+                              'avatar_tiny': avatar_tiny,
+                              'photo_wall': photo_wall,
+                              'photo_wall_tiny': photo_wall_tiny,
+                              'updated_ts': long(time.time()), }})
+            
     #==========================================================================
     # topic
-    #
-    #    _id
-    #    news_type                || int       || 0-article；1-video
-    #    title                    || string    ||
-    #    abstract                 || string    || 摘要 less than 20 words
-    #    author                   || string    || 用于显示的作者
-    #    module                   || int       || 版块id > 0
-    #    created_timestamp        || long      || 
-    #    last_modify_timestamp    || long      ||
-    #    pub_timestamp            || long      ||
-    #    pub_status               || int       || 默认0；0-未发布； 1-发布
-    #    is_delete                || int       || 默认0；0-不删除； 1-删除
-    #    delete_timestamp         || long      ||
-    #    body                     || string    || 
-    #    inner_pic_sub_url        || string    || 文章配图的链接地址
-    #    video_target_url         || string    ||
-    #
     #==========================================================================
-   
+    def add_shadow_topic(self, topic_level = 5):
+        topic = {'created_ts': long(time.time()),
+                'topic_level': topic_level,
+                
+                'author': None,
+                'title': None,
+                'content': None,
+                'topic_photos': None,
+                'topic_photos_tiny': None,
+                'burn_ts': None,
+                'updated_ts': long(time.time()),
+                
+                'comment_count': 0,
+                'like_users': [],
+                'like_count': 0,
+                
+                'action_ts': long(time.time()),  
+                }
+        return self.get_collection('topic').insert(topic)
+    
+    def update_topic_by_topic_id(self, topic_id, author, title, content, 
+                                 topic_photos, topic_photos_tiny,
+                                 burn_ts):
+        return self.get_collection('topic')\
+            .update({'_id': topic_id},
+                    {'$set': {'author': author,
+                              'title': title,
+                              'content': content,
+                              'topic_photos': topic_photos,
+                              'topic_photos_tiny': topic_photos_tiny,
+                              'burn_ts': burn_ts,
+                              'updated_ts': long(time.time()),
+                              'action_ts': long(time.time()), }})
+    
+    def get_topic_by_topic_id(self, topic_id):
+        return self.get_collection('topic').find_one({'_id': topic_id})
       
     #==========================================================================
     # comment
-    #
-    #    _id                
-    #    user_id            || ObjectId      || 发布者id
-    #    news_id            || ObjectId      || 关联的新闻id
-    #    pub_timestamp      || long          || 发布时间
-    #    msg                || string        ||
-    #
     #==========================================================================
 
 
