@@ -38,6 +38,7 @@
 
 ## user_relation
 * primary_key : user_id
+
 | Name | Type | Default | Description |
 | ---- | ---- | ---- | ---- |
 | user_id | ObjectId | key | app internal user_id |
