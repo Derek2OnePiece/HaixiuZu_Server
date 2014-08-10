@@ -27,6 +27,45 @@ from BasicServer.src.base.aop import required_login
 db = dbtools.DB()
 
 
+def register_action(request):
+    # receive POST data:
+    req_post_data = None
+    if request.method == 'POST':
+        req_post_data = simplejson.load(request.raw_post_data)
+    '''
+    required parameters:
+      email
+      password
+      name
+    '''
+    email = None
+    password = None
+    name = None
+    if 'email' in req_post_data:
+        email = req_post_data['email']
+    else:
+        return build_error_response(request, 700, ERR_CODE[700])
+    if 'password' in req_post_data:
+        password = req_post_data['password']
+    else:
+        return build_error_response(request, 700, ERR_CODE[700])
+    if 'name' in req_post_data:
+        name = req_post_data['name']
+    else:
+        return build_error_response(request, 700, ERR_CODE[700])
+    '''
+    optional parameters:
+      loc_city_id
+      loc_city_name
+    '''
+    loc_city_id = None
+    loc_city_name = None
+    if 'loc_city_id' in req_post_data:
+        loc_city_id = req_post_data['loc_city_id']
+    if 'loc_city_name' in req_post_data:
+        loc_city_name = req_post_data['loc_city_name']
+    
+
 # TODO check already login
 def login_action(request):
     # receive request data

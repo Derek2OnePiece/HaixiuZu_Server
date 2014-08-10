@@ -54,22 +54,23 @@ class DB:
     # user
     # user_map
     #==========================================================================
-    def add_shadow_user(self, user_level = 5):
+    def add_shadow_user(self, user_type = 0, user_level = 5):
         user = {'created_ts': long(time.time()),
+                'user_type': user_type,
                 'user_level': user_level,
-                
+                'email': None,
+                'password': None,
                 'name': None,
                 'desc': None,
+                'homepage': None,
                 'avatar': None,
-                'avatar_tiny': None,
                 'photo_wall': None,
                 'photo_wall_tiny': None,
-                
                 'loc_city_id': None,
                 'loc_city_name': None,
-                'geo_enabled': 0,
-                
-                'updated_ts': None,
+                'updated_ts': long(time.time()),
+                'liked_topics': [],
+                'commented_topics': [],
                 }
         return self.get_collection('user').insert(user)
     

@@ -53,3 +53,4 @@ coverage.xml
 docs/_build/
 
 /BasicServer/BasicServer/sqlite.db
+/BasicServer/BasicServer/sqlite.db
